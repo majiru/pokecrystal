@@ -1,0 +1,57 @@
+#!/bin/rc
+{
+	for(i in gfx/pokemon/*/front.png){
+		which=`{echo $i | sed 's,gfx/pokemon/,,g;s,/front.png,,g'}
+		echo 'gfx/pokemon/'^$which^'/front.animated.2bpp:	gfx/pokemon/'^$which^'/front.2bpp gfx/pokemon/'^$which^'/front.dimensions'
+		echo '	$TANIMG -o $target $prereq'
+		echo 'gfx/pokemon/'^$which^'/front.animated.tilemap:	gfx/pokemon/'^$which^'/front.2bpp gfx/pokemon/'^$which^'/front.dimensions'
+		echo '	$TANIMG -t $target $prereq'
+		echo 'gfx/pokemon/'^$which^'/bitmask.asm:	gfx/pokemon/'^$which^'/front.animated.tilemap gfx/pokemon/'^$which^'/front.dimensions'
+		echo '	$TANIM -b $prereq >$target'
+		echo 'gfx/pokemon/'^$which^'/frames.asm:	gfx/pokemon/'^$which^'/front.animated.tilemap gfx/pokemon/'^$which^'/front.dimensions'
+		echo '	$TANIM -f $prereq >$target'
+		echo 'gfx/pokemon/'^$which^'/back.2bpp:	gfx/pokemon/'^$which^'/back.png'
+		echo '	rgbgfx -h -o $target $prereq'
+	}
+	for(i in gfx/trainers/*.png){
+		dst=`{echo $i | sed 's/\.png/\.2bpp/g'}
+		echo $dst^':	'^$i
+		echo '	rgbgfx -h -o $target $prereq'
+	}
+} >anim.mk
+{ for(i in `{walk | grep asm}) cat $i } | \
+sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*((bitmask|frames)*\.(asm|2bpp|1bpp|dimensions|gbcpal|lz)))".*/\2/gp' | \
+awk '
+	function out(name, arr){
+		printf("%sFILES=\\\n", name);
+		for(i = 0; i < length(arr); i++)
+			printf("	%s\\\n", arr[i]);
+		print("");
+	}
+	/lz$/{ LZ[lzi++] = $0; }
+	/gbcpal$/{ PAL[pali++] = $0; }
+	/dimensions$/{ DIM[dimi++] = $0; }
+	/1bpp$/{ B1[b1i++] = $0; }
+	/2bpp$/{ B2[b2i++] = $0; }
+	/frames\.asm$/{
+		if(match($0, /(kanto|johto)_frames\.asm$/))
+			next;
+		if(match($0, /unown.frames.asm$/))
+			next;
+		FR[fri++] = $0;
+	}
+	/bitmask\.asm$/{
+		if(match($0, /unown.bitmask.asm/))
+			next;
+		BM[bmi++] = $0;
+	}
+	END{
+		out("BM", BM);
+		out("FR", FR);
+		out("B2", B2);
+		out("B1", B1);
+		out("DIM", DIM);
+		out("PAL", PAL);
+		out("LZ", LZ);
+	}
+'>inc.mk

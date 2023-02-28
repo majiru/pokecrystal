@@ -41,64 +41,8 @@ OFILES=\
 
 all:V:	$TARG
 
-include:VE:
-	{
-		for(i in gfx/pokemon/*/front.png){
-			which=`{echo $i | sed 's,gfx/pokemon/,,g;s,/front.png,,g'}
-			echo 'gfx/pokemon/'^$which^'/front.animated.2bpp:	gfx/pokemon/'^$which^'/front.2bpp gfx/pokemon/'^$which^'/front.dimensions'
-			echo '	$TANIMG -o $target $prereq'
-			echo 'gfx/pokemon/'^$which^'/front.animated.tilemap:	gfx/pokemon/'^$which^'/front.2bpp gfx/pokemon/'^$which^'/front.dimensions'
-			echo '	$TANIMG -t $target $prereq'
-			echo 'gfx/pokemon/'^$which^'/bitmask.asm:	gfx/pokemon/'^$which^'/front.animated.tilemap gfx/pokemon/'^$which^'/front.dimensions'
-			echo '	$TANIM -b $prereq >$target'
-			echo 'gfx/pokemon/'^$which^'/frames.asm:	gfx/pokemon/'^$which^'/front.animated.tilemap gfx/pokemon/'^$which^'/front.dimensions'
-			echo '	$TANIM -f $prereq >$target'
-			echo 'gfx/pokemon/'^$which^'/back.2bpp:	gfx/pokemon/'^$which^'/back.png'
-			echo '	rgbgfx -h -o $target $prereq'
-		}
-		for(i in gfx/trainers/*.png){
-			dst=`{echo $i | sed 's/\.png/\.2bpp/g'}
-			echo $dst^':	'^$i
-			echo '	rgbgfx -h -o $target $prereq'
-		}
-	} >anim.mk
-	{
-		echo 'BMFILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*bitmask\.asm)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g' | grep -v 'unown/bitmask.asm'
-		}
-		echo
-		echo 'FRFILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*frames\.asm)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g' | grep -v 'gfx/pokemon/unown/frames.asm|(kanto|johto)_frames.asm|gfx/pokemon/unown_frames.asm'
-		}
-		echo
-		echo 'B2FILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*\.2bpp)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g'
-		}
-		echo
-		echo 'B1FILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*\.1bpp)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g'
-		}
-		echo
-		echo 'DIMFILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*\.dimensions)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g'
-		}
-		echo
-		echo 'PALFILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*\.gbcpal)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g'
-		}
-		echo
-		echo 'LZFILES=\'
-		for(i in `{walk | grep asm}){
-			sed -n 's/.*(INCLUDE|INCBIN) "(gfx.*\.lz)".*/\2/gp' $i | sed 's/^/	/g;s/$/\\/g'
-		}
-		echo
-	} >inc.mk
+include:V:
+	./tools/scan_includes.rc
 
 check:V:	$TARG
 	@{
