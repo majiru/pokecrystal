@@ -51,7 +51,7 @@ gfx/title/old_fg.2bpp:	gfx/title/old_fg.png
 	rgbgfx -o $target $prereq(1)
 	$TGFX --interleave --png $prereq(1) -o $target $target
 gfx/title/logo.2bpp:	gfx/title/logo.png
-	rgbgfx -x2 -o $target $prereq(1)
+	rgbgfx -x4 -o $target $prereq(1)
 
 gfx/trade/ball.2bpp:	gfx/trade/ball.png
 	rgbgfx -o $target $prereq(1)
@@ -62,7 +62,7 @@ gfx/trade/game_boy.2bpp:	gfx/trade/game_boy.png
 
 gfx/slots/slots_1.2bpp:	gfx/slots/slots_1.png
 	rgbgfx -o $target $prereq(1)
-	$TGFX --remove-whitespace -o $target $target
+	$TGFX --trim-whitespace -o $target $target
 gfx/slots/slots_2.2bpp:	gfx/slots/slots_2.png
 	rgbgfx -o $target $prereq(1)
 	$TGFX --interleave --png $prereq(1) -o $target $target
@@ -161,8 +161,8 @@ gfx/battle/dude.2bpp:	gfx/battle/dude.png
 	rgbgfx -h -o $target $prereq(1)
 
 gfx/font/unused_bold_font.1bpp:	gfx/font/unused_bold_font.png
-	rgbgfx -o $target $prereq(1)
-	$TGFX --trim-whitespace -o $target $target
+	rgbgfx -d1 -o $target $prereq(1)
+	$TGFX -d1 --trim-whitespace -o $target $target
 
 gfx/sgb/sgb_border.2bpp:	gfx/sgb/sgb_border.png
 	rgbgfx -o $target $prereq(1)
@@ -194,7 +194,7 @@ gfx/mobile/card_folder.2bpp:	gfx/mobile/card_folder.png
 	$TGFX --trim-whitespace -o $target $target
 gfx/mobile/phone_tiles.2bpp:	gfx/mobile/phone_tiles.png
 	rgbgfx -o $target $prereq(1)
-	$TGFX --trim-whitespace -o $target $target
+	$TGFX --remove-whitespace -o $target $target
 gfx/mobile/pichu_animated.2bpp:	gfx/mobile/pichu_animated.png
 	rgbgfx -o $target $prereq(1)
 	$TGFX --trim-whitespace -o $target $target

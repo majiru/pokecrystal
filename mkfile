@@ -81,6 +81,29 @@ gfx/sgb/sgb_border.sgb.tilemap:	gfx/sgb/sgb_border.bin
 <anim.mk
 <except.mk
 
+# Dewgong has an unused tile id in its last frame. The tile itself is missing.
+gfx/pokemon/dewgong/frames.asm: gfx/pokemon/dewgong/front.animated.tilemap gfx/pokemon/dewgong/front.dimensions
+	$TANIM -f $prereq > $target
+	echo '	db $4d' >> $target
+
+# Lugia has two unused tile ids in its last frame. The tiles themselves are missing.
+gfx/pokemon/lugia/frames.asm: gfx/pokemon/lugia/front.animated.tilemap gfx/pokemon/lugia/front.dimensions
+	$TANIM -f $prereq > $target
+	echo '	db $5e, $59' >> $target
+
+# Girafarig has a redundant tile after the end. It is used in two frames, so it must be injected into the generated graphics.
+# This is more involved, so it's hacked into pokemon_animation_graphics.
+gfx/pokemon/girafarig/front.animated.2bpp:	gfx/pokemon/girafarig/front.2bpp gfx/pokemon/girafarig/front.dimensions
+	$TANIMG --girafarig -o $target $prereq
+gfx/pokemon/girafarig/front.animated.tilemap:	gfx/pokemon/girafarig/front.2bpp gfx/pokemon/girafarig/front.dimensions
+	$TANIMG --girafarig -t $target $prereq
+
+# matching
+# LZFLAGS=--compressor multipass
+# <lz.mk
+
+LZFLAGS=
+
 $TARG: $OFILES 
 	$LD $LDFLAGS -o $target $OFILES
 	$FIX $FIFLAGS $target
@@ -102,7 +125,7 @@ $TARG: $OFILES
 	rgbgfx -p $target $stem.png
 
 %.lz:	%
-	$LZ -- $stem $target
+	$LZ $LZFLAGS -- $stem $target
 
 clean:VQ:
 	for(i in $B2FILES)
