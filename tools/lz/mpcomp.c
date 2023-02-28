@@ -13,6 +13,7 @@
 */
 
 struct command * try_compress_multi_pass (const unsigned char * data, const unsigned char * flipped, unsigned short * size, unsigned flags) {
+  struct command _tmp;
   struct command * result = calloc(*size, sizeof(struct command));
   unsigned char * reversed = malloc(*size);
   short * sources = malloc(*size * sizeof(short));
@@ -32,12 +33,17 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
       result[pos].count = current;
       if ((result[pos].command == 2) && (current & 1) && !(flags & 2)) result[pos].count --;
     }
-    if (result[pos].count <= command_size(result[pos])) result[pos] = (struct command) {.command = 0, .count = 0};
+    _tmp.command = 0;
+    _tmp.count = 0;
+    _tmp.value = 0;
+    if (result[pos].count <= command_size(result[pos])) result[pos] = _tmp;
   }
   for (pos = 0; pos < *size; pos ++)
     if (!result[pos].command) {
       for (current = 1; (current < MAX_COMMAND_COUNT) && ((pos + current) < *size); current ++) if (result[pos + current].command) break;
-      result[pos] = (struct command) {.command = 0, .count = current, .value = pos};
+      result[pos].command = 0;
+      result[pos].count = current;
+      result[pos].value = pos;
     } else if (result[pos].count > MAX_COMMAND_COUNT) {
       result[pos + MAX_COMMAND_COUNT] = result[pos];
       result[pos + MAX_COMMAND_COUNT].count -= MAX_COMMAND_COUNT;
@@ -57,10 +63,12 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
 struct command pick_command_for_pass (const unsigned char * data, const unsigned char * flipped, const unsigned char * reversed, const short * sources,
                                       unsigned short length, unsigned short position, unsigned flags) {
   struct command result = pick_repetition_for_pass(data, length, position, flags);
+  unsigned char* _arr[] = {data, flipped, reversed};
   if (result.count >= MULTIPASS_SKIP_THRESHOLD) return result;
   unsigned char p;
   for (p = 0; p < 3; p ++) {
-    struct command temp = pick_copy_for_pass(data, p[(const unsigned char * []) {data, flipped, reversed}], sources, p + 4, length, position, flags);
+    struct command temp;
+    temp = pick_copy_for_pass(data, _arr[p], sources, p + 4, length, position, flags);
     if (temp.command == 7) continue;
     if (temp.count > result.count) result = temp;
   }
@@ -70,25 +78,42 @@ struct command pick_command_for_pass (const unsigned char * data, const unsigned
 
 struct command pick_repetition_for_pass (const unsigned char * data, unsigned short length, unsigned short position, unsigned flags) {
   unsigned short p;
+  struct command _tmp;
   if (data[position]) {
-    if ((position + 1) >= length) return (struct command) {.command = 1, .count = 1, .value = data[position]};
+    if ((position + 1) >= length){
+        _tmp.command = 1;
+        _tmp.count = 1;
+        _tmp.value = data[position];
+        return _tmp;
+    }
     struct command result;
-    if (!(flags & 8) && (data[position] == data[position + 1]))
-      result = (struct command) {.command = 1, .value = data[position]};
-    else
-      result = (struct command) {.command = 2, .value = data[position] | (data[position + 1] << 8)};
+    if (!(flags & 8) && (data[position] == data[position + 1])){
+      result.command = 1;
+      result.count = 0;
+      result.value = data[position];
+    } else {
+      result.command = 2;
+      result.count = 0;
+      result.value = data[position] | (data[position + 1] << 8);
+    }
     for (p = 1; ((position + p) < length) && (p < LOOKAHEAD_LIMIT); p ++) if (data[position + p] != data[position + (p & 1)]) break;
     result.count = p;
     return result;
   } else {
     for (p = position + 1; (p < length) && (p < (position + LOOKAHEAD_LIMIT)); p ++) if (data[p]) break;
-    return (struct command) {.command = 3, .count = p - position};
+    _tmp.command = 3;
+    _tmp.count = p - position;
+    _tmp.value = 0;
+    return _tmp;
   }
 }
 
 struct command pick_copy_for_pass (const unsigned char * data, const unsigned char * reference, const short * sources, unsigned char command_type,
                                    unsigned short length, unsigned short position, unsigned flags) {
-  struct command result = {.command = 7, .count = (flags & 4) ? 4 : 3};
+  struct command result;
+  result.command = 7;
+  result.count = (flags & 4) ? 4 : 3;
+  result.value = 0;
   if (length < 3) return result;
   unsigned refpos, count;
   const unsigned char * current;
@@ -106,7 +131,9 @@ struct command pick_copy_for_pass (const unsigned char * data, const unsigned ch
     if (count > (length - refpos)) count = length - refpos;
     if (count > (length - position)) count = length - position;
     if (result.count > count) continue;
-    result = (struct command) {.command = command_type, .count = count, .value = sources[-1]};
+    result.command = command_type;
+    result.count = count;
+    result.value = sources[-1];
   }
   return result;
 }

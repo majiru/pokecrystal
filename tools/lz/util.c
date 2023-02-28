@@ -42,9 +42,10 @@ int is_better (struct command new, struct command old) {
 }
 
 short command_size (struct command command) {
+  short _arr[] = {command.count, 1, 2, 0};
   short header_size = 1 + (command.count > SHORT_COMMAND_COUNT);
   if (command.command & 4) return header_size + 1 + (command.value >= 0);
-  return header_size + command.command[(short []) {command.count, 1, 2, 0}];
+  return header_size + _arr[command.command];
 }
 
 unsigned short compressed_length (const struct command * commands, unsigned short count) {

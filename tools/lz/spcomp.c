@@ -22,6 +22,7 @@
 */
 
 struct command * try_compress_single_pass (const unsigned char * data, const unsigned char * bitflipped, unsigned short * length, unsigned flags) {
+  struct command _tmp;
   struct command * commands = malloc(sizeof(struct command) * *length);
   memset(commands, -1, sizeof(struct command) * *length);
   struct command * current_command = commands;
@@ -35,16 +36,19 @@ struct command * try_compress_single_pass (const unsigned char * data, const uns
       *current_command = pick_best_command(2, repetition, copy);
     else
       *current_command = pick_best_command(2, copy, repetition);
-    *current_command = pick_best_command(2, (struct command) {.command = 0, .count = 1, .value = position}, *current_command);
+    _tmp.command = 0;
+    _tmp.count = 1;
+    _tmp.value = position;
+    *current_command = pick_best_command(2, _tmp, *current_command);
     if ((flags & 2) && (command_size(*current_command) == current_command -> count))
       if (previous_data && (previous_data != SHORT_COMMAND_COUNT) && (previous_data != MAX_COMMAND_COUNT))
-        *current_command = (struct command) {.command = 0, .count = 1, .value = position};
+        *current_command = _tmp;
     if (scan_delay_flag) {
       if (scan_delay >= scan_delay_flag)
         scan_delay = 0;
       else if (current_command -> command) {
         scan_delay ++;
-        *current_command = (struct command) {.command = 0, .count = 1, .value = position};
+        *current_command = _tmp;
       }
     }
     if (current_command -> command)
@@ -59,15 +63,27 @@ struct command * try_compress_single_pass (const unsigned char * data, const uns
 }
 
 struct command find_best_copy (const unsigned char * data, unsigned short position, unsigned short length, const unsigned char * bitflipped, unsigned flags) {
-  struct command simple = {.command = 7};
+  struct command simple;
+  simple.command = 7;
+  simple.count = 0;
+  simple.value = 0;
   struct command flipped = simple, backwards = simple;
   short count, offset;
-  if ((count = scan_forwards(data + position, length - position, data, position, &offset)))
-    simple = (struct command) {.command = 4, .count = count, .value = offset};
-  if ((count = scan_forwards(data + position, length - position, bitflipped, position, &offset)))
-    flipped = (struct command) {.command = 5, .count = count, .value = offset};
-  if ((count = scan_backwards(data, length - position, position, &offset)))
-    backwards = (struct command) {.command = 6, .count = count, .value = offset};
+  if ((count = scan_forwards(data + position, length - position, data, position, &offset))){
+    simple.command = 4;
+    simple.count = count;
+    simple.value = offset;
+  }
+  if ((count = scan_forwards(data + position, length - position, bitflipped, position, &offset))){
+    flipped.command = 5;
+    flipped.count = count;
+    flipped.value = offset;
+  }
+  if ((count = scan_backwards(data, length - position, position, &offset))){
+    backwards.command = 6;
+    backwards.count = count;
+    backwards.value = offset;
+  }
   struct command command;
   switch (flags / 24) {
     case 0: command = pick_best_command(3, simple, backwards, flipped); break;
@@ -121,7 +137,19 @@ unsigned short scan_backwards (const unsigned char * data, unsigned short limit,
 }
 
 struct command find_best_repetition (const unsigned char * data, unsigned short position, unsigned short length) {
-  if ((position + 1) >= length) return data[position] ? ((struct command) {.command = 7}) : ((struct command) {.command = 3, .count = 1});
+  struct command out;
+  if ((position + 1) >= length){
+    if(data[position]){
+      out.command = 7;
+      out.count = 0;
+      out.value = 0;
+    } else {
+      out.command = 3;
+      out.count = 1;
+      out.value = 0;
+    }
+    return out;
+  }
   unsigned char value[2] = {data[position], data[position + 1]};
   unsigned repcount, limit = length - position;
   if (limit > MAX_COMMAND_COUNT) limit = MAX_COMMAND_COUNT;
@@ -129,7 +157,12 @@ struct command find_best_repetition (const unsigned char * data, unsigned short 
   struct command result;
   result.count = repcount;
   if (*value != value[1]) {
-    if (!*value && (repcount < 3)) return (struct command) {.command = 3, .count = 1};
+    if (!*value && (repcount < 3)){
+      out.command = 3;
+      out.count = 1;
+      out.value = 0;
+      return out;
+    }
     result.command = 2;
     result.value = ((unsigned) (*value)) | (((unsigned) (value[1])) << 8);
   } else if (*value) {

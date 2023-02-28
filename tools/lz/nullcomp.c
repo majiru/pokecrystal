@@ -8,13 +8,17 @@
 
 struct command * store_uncompressed (__attribute__((unused)) const unsigned char * data, __attribute__((unused)) const unsigned char * bitflipped, unsigned short * size, unsigned flags) {
   unsigned short position, block, remainder = *size;
+  struct command _tmp;
   struct command * result = NULL;
   *size = 0;
   for (position = 0; remainder; position += block, remainder -= block) {
     block = (remainder > MAX_COMMAND_COUNT) ? MAX_COMMAND_COUNT : remainder;
     if (!(flags & 1) && (block <= (2 * SHORT_COMMAND_COUNT)) && (block > SHORT_COMMAND_COUNT)) block = SHORT_COMMAND_COUNT;
     result = realloc(result, sizeof(struct command) * (1 + *size));
-    result[(*size) ++] = (struct command) {.command = 0, .count = block, .value = position};
+    _tmp.command = 0;
+    _tmp.count = block;
+    _tmp.value = position;
+    result[(*size) ++] = _tmp;
   }
   return result;
 }

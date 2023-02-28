@@ -9,7 +9,7 @@ void parse_args(int argc, char *argv[], bool *european) {
 		{"help", no_argument, 0, 'h'},
 		{0}
 	};
-	for (int opt; (opt = getopt_long(argc, argv, "eh", long_options)) != -1;) {
+	for (int opt; (opt = getopt_long(argc, argv, "eh", long_options, NULL, 0)) != -1;) {
 		switch (opt) {
 		case 'e':
 			*european = true;

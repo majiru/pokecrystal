@@ -9,6 +9,7 @@
 
 struct command * try_compress_repetitions (const unsigned char * data, __attribute__((unused)) const unsigned char * bitflipped, unsigned short * size, unsigned flags) {
   unsigned short pos = 0, skipped = 0;
+  struct command _tmp;
   struct command * result = malloc(*size * sizeof(struct command));
   struct command * current = result;
   struct command candidate;
@@ -24,26 +25,47 @@ struct command * try_compress_repetitions (const unsigned char * data, __attribu
       candidate.value |= candidate.value << 8;
     }
     if ((flags & (1 << candidate.command)) && (command_size(candidate) <= candidate.count)) {
-      if (skipped) *(current ++) = (struct command) {.command = 0, .count = skipped, .value = pos - skipped};
+      _tmp.command = 0;
+      _tmp.count = skipped;
+      _tmp.value = pos - skipped;
+      if (skipped) *(current ++) = _tmp;
       skipped = 0;
       *(current ++) = candidate;
       pos += candidate.count;
     } else {
       pos ++;
       if ((++ skipped) == MAX_COMMAND_COUNT) {
-        *(current ++) = (struct command) {.command = 0, .count = MAX_COMMAND_COUNT, .value = pos - MAX_COMMAND_COUNT};
+        _tmp.command = 0;
+        _tmp.count = MAX_COMMAND_COUNT;
+        _tmp.value = pos - MAX_COMMAND_COUNT;
+        *(current ++) = _tmp;
         skipped = 0;
       }
     }
   }
-  if (skipped) *(current ++) = (struct command) {.command = 0, .count = skipped, .value = pos - skipped};
+  _tmp.command = 0;
+  _tmp.count = skipped;
+  _tmp.value = pos - skipped;
+  if (skipped) *(current ++) = _tmp;
   *size = current - result;
   result = realloc(result, *size * sizeof(struct command));
   return result;
 }
 
 struct command find_repetition_at_position (const unsigned char * data, unsigned short position, unsigned short length) {
-  if ((position + 1) >= length) return data[position] ? ((struct command) {.command = 7}) : ((struct command) {.command = 3, .count = 1});
+  struct command ret;
+  if ((position + 1) >= length){
+      if(data[position]){
+      ret.command = 7;
+      ret.count = 0;
+      ret.value = 0;
+      return ret;
+    }
+    ret.command = 3;
+    ret.count = 1;
+    ret.value = 0;
+    return ret;
+  }
   unsigned char value[2] = {data[position], data[position + 1]};
   unsigned repcount, limit = length - position;
   if (limit > MAX_COMMAND_COUNT) limit = MAX_COMMAND_COUNT;
@@ -51,7 +73,12 @@ struct command find_repetition_at_position (const unsigned char * data, unsigned
   struct command result;
   result.count = repcount;
   if (*value != value[1]) {
-    if (!*value && (repcount < 3)) return (struct command) {.command = 3, .count = 1};
+    if (!*value && (repcount < 3)){
+        ret.command = 3;
+        ret.count = 1;
+        ret.value = 0;
+        return ret;
+    }
     result.command = 2;
     result.value = ((unsigned) (*value)) | (((unsigned) (value[1])) << 8);
   } else if (*value) {

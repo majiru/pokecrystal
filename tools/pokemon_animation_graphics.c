@@ -17,7 +17,7 @@ void parse_args(int argc, char *argv[], struct Options *options) {
 		{"help", no_argument, 0, 'h'},
 		{0}
 	};
-	for (int opt; (opt = getopt_long(argc, argv, "o:t:h", long_options)) != -1;) {
+	for (int opt; (opt = getopt_long(argc, argv, "o:t:h", long_options, NULL, 0)) != -1;) {
 		switch (opt) {
 		case 'o':
 			options->out_filename = optarg;
