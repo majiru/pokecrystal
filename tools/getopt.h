@@ -30,6 +30,14 @@
 extern "C" {
 #endif
 
+#ifdef __plan9__
+typedef ulong size_t;
+typedef Rune wchar_t;
+enum { MB_LEN_MAX = 4 };
+#define mblen(r,n) (utfnlen(r, n))
+#define mbtowc(r,s,n) (chartorune(r,s))
+#endif
+
 extern char *optarg;
 extern int optind, musl_opterr, musl_optopt, musl_optreset;
 

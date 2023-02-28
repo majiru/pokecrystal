@@ -7,7 +7,7 @@ noreturn error_exit (int error_code, const char * error, ...) {
   vfprintf(stderr, error, ap);
   va_end(ap);
   fputc('\n', stderr);
-  exit(error_code);
+  exits("error");
 }
 
 unsigned char * read_file_into_buffer (const char * file, unsigned short * size) {

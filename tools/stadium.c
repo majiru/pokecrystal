@@ -182,7 +182,7 @@ void calculate_checksums(uint8_t *file, bool european) {
 	SET_U16BE(file + GLOBAL_OFF, globalsum);
 }
 
-int main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) {
 	bool european = false;
 	parse_args(argc, argv, &european);
 
@@ -199,5 +199,5 @@ int main(int argc, char *argv[]) {
 		calculate_checksums(file, european);
 	}
 	write_u8(filename, file, filesize);
-	return 0;
+	exits(nil);
 }

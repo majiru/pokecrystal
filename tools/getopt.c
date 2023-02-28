@@ -23,12 +23,9 @@
 
 /* This implementation was taken from musl and modified for RGBDS */
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <limits.h>
+#include <u.h>
+#include <libc.h>
 #include <stdio.h>
-#include <string.h>
-#include <wchar.h>
 
 #include "getopt.h"
 

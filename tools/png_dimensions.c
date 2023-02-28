@@ -12,12 +12,12 @@ uint8_t read_png_dimensions(const char *filename) {
 	return (width_tiles << 4) | width_tiles;
 }
 
-int main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) {
 	if (argc < 3) {
 		usage_exit(1);
 	}
 
 	uint8_t output_byte = read_png_dimensions(argv[1]);
 	write_u8(argv[2], &output_byte, 1);
-	return 0;
+	exits(nil);
 }

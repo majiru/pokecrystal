@@ -164,7 +164,7 @@ void print_bitmasks(const struct Bitmasks *bitmasks) {
 	}
 }
 
-int main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) {
 	struct Options options = {0};
 	parse_args(argc, argv, &options);
 
@@ -191,5 +191,5 @@ int main(int argc, char *argv[]) {
 	}
 
 	free(tilemap);
-	return 0;
+	exits(nil);
 }

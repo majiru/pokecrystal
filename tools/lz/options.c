@@ -118,7 +118,7 @@ noreturn usage (const char * program_name) {
   fputs("                                   cleared (default: 0).\n", stderr);
   fputs("The source and output filenames can be given as - (or omitted) to use standard\n", stderr);
   fputs("input and output. Use -- to indicate that subsequent arguments are file names.\n", stderr);
-  exit(3);
+  exits("usage");
 }
 
 noreturn list_compressors (void) {
@@ -137,5 +137,5 @@ noreturn list_compressors (void) {
   fputs("Note: the offset indicates the compressor's lowest method number when the\n", stderr);
   fputs("--compressor option is not given. When that option is used, every compressor's\n", stderr);
   fputs("methods are numbered from zero.\n", stderr);
-  exit(3);
+  exits("usage");
 }

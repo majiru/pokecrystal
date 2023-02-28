@@ -1,6 +1,6 @@
 #include "proto.h"
 
-int main (int argc, char ** argv) {
+void main (int argc, char ** argv) {
   struct options options = get_options(argc, argv);
   unsigned short size;
   unsigned char * file_buffer = read_file_into_buffer(options.input, &size);
@@ -22,7 +22,7 @@ int main (int argc, char ** argv) {
   }
   free(file_buffer);
   free(commands);
-  return 0;
+  exits(nil);
 }
 
 struct command * compress (const unsigned char * data, unsigned short * size, unsigned method) {

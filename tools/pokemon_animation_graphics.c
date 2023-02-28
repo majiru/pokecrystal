@@ -144,7 +144,7 @@ void write_tilemap(const char *filename, const uint8_t *tiles, long tiles_size, 
 	free(data);
 }
 
-int main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) {
 	struct Options options = {0};
 	parse_args(argc, argv, &options);
 
@@ -167,5 +167,5 @@ int main(int argc, char *argv[]) {
 	}
 
 	free(tiles);
-	return 0;
+	exits(nil);
 }

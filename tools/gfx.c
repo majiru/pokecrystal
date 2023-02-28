@@ -258,7 +258,7 @@ void interleave(struct Graphic *graphic, int width) {
 	free(interleaved);
 }
 
-int main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) {
 	parse_args(argc, argv);
 
 	argc -= optind;
@@ -300,5 +300,5 @@ int main(int argc, char *argv[]) {
 	}
 
 	free(graphic.data);
-	return 0;
+	exits(nil);
 }

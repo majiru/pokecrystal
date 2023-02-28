@@ -1,7 +1,6 @@
+#include <u.h>
+#include <libc.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
 
 #define NUM_COMPRESSORS              4
 #define COMPRESSION_METHODS         96 /* sum of all values for the methods field in compressors */
@@ -45,7 +44,7 @@ extern const unsigned char bit_flipping_table[];
 extern char option_name_buffer[];
 
 // main.c
-int main(int, char **);
+void main(int, char **);
 struct command * compress(const unsigned char *, unsigned short *, unsigned);
 
 // merging.c
