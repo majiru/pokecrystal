@@ -1,18 +1,20 @@
 #include "proto.h"
 
 struct command * select_optimal_sequence (struct command ** sequences, const unsigned short * lengths, unsigned short * final_length) {
+  int _tmp;
   struct command * compressor_sequences[NUM_COMPRESSORS * 2];
   unsigned short compressor_lengths[NUM_COMPRESSORS * 2];
   struct command * inverted_sequences[COMPRESSION_METHODS];
   unsigned short inverted_lengths[COMPRESSION_METHODS];
-  unsigned p, current, method = 0;
+  unsigned int p, current, method = 0;
   for (current = 0; current < NUM_COMPRESSORS; current ++) {
     compressor_sequences[current] = select_command_sequence(sequences + method, lengths + method, compressors[current].methods, compressor_lengths + current);
-    compressor_sequences[current + NUM_COMPRESSORS] = select_command_sequence(sequences + method, lengths + method, -(int) compressors[current].methods,
+    _tmp = compressors[current].methods;
+    compressor_sequences[current + NUM_COMPRESSORS] = select_command_sequence(sequences + method, lengths + method, -_tmp,
                                                                               compressor_lengths + (current + NUM_COMPRESSORS));
     for (p = 0; p < compressors[current].methods; p ++) {
-      inverted_sequences[method + compressors[current].methods - 1 - p] = sequences[method + p];
-      inverted_lengths[method + compressors[current].methods - 1 - p] = lengths[method + p];
+      inverted_sequences[(int)method + (int)compressors[current].methods - 1 - (int)p] = sequences[method + p];
+      inverted_lengths[(int)method + (int)compressors[current].methods - 1 - (int)p] = lengths[method + p];
     }
     method += compressors[current].methods;
   }

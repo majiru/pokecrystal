@@ -57,6 +57,7 @@ struct command * get_commands_from_file (const unsigned char * data, unsigned sh
 
 unsigned char * get_uncompressed_data (const struct command * commands, const unsigned char * compressed, unsigned short * size) {
   const struct command * limit = commands + *size;
+  int _tmp;
   unsigned char * result = malloc(MAX_FILE_SIZE + MAX_COMMAND_COUNT);
   unsigned char * current = result;
   unsigned short p;
@@ -76,7 +77,8 @@ unsigned char * get_uncompressed_data (const struct command * commands, const un
       default: {
         const unsigned char * ref = ((commands -> value < 0) ? current : result) + commands -> value;
         for (p = 0; p < commands -> count; p ++) {
-          current[p] = ref[(commands -> command == 6) ? -(int) p : p];
+          _tmp = p;
+          current[p] = ref[(commands -> command == 6) ? -_tmp : _tmp];
           if (commands -> command == 5) current[p] = bit_flipping_table[current[p]];
         }
         current += commands -> count;
